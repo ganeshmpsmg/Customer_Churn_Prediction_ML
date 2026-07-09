@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  dashboard:
+    build: .
+    image: churn-prediction:latest
+    container_name: churn-dashboard
+    ports:
+      - "8501:8501"
+    command: ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    volumes:
+      - ./models:/app/models
+      - ./reports:/app/reports
+    restart: unless-stopped
+
+  api:
+    build: .
+    image: churn-prediction:latest
+    container_name: churn-api
+    ports:
+      - "8000:8000"
+    environment:
+      - CHURN_API_KEY=${CHURN_API_KEY:-dev-secret-key}
+    command: ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+    volumes:
+      - ./models:/app/models
+      - ./reports:/app/reports
+    restart: unless-stopped
