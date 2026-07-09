@@ -48,6 +48,24 @@ def validate_data(df: pd.DataFrame):
 def clean_data(df: pd.DataFrame, drop_duplicates: bool = True) -> pd.DataFrame:
     df = df.copy()
 
+    # Normalize column names
+    df.columns = (
+        df.columns
+        .str.strip()
+        .str.replace(" ", "", regex=False)
+    )
+
+    # Rename common variants to the names expected by the model
+    rename_map = {
+        "Tenure": "tenure",
+        "TENURE": "tenure",
+        "Months": "tenure",
+        "tenure_months": "tenure",
+        "Monthly Charges": "MonthlyCharges",
+        "Total Charges": "TotalCharges",
+    }
+    df.rename(columns=rename_map, inplace=True)
+
     # Drop exact duplicates (skip at inference time to keep row alignment with caller's IDs)
     if drop_duplicates:
         before = len(df)

@@ -188,7 +188,13 @@ elif page == "📁 Batch Prediction":
     uploaded_file = st.file_uploader("Upload customer CSV", type=["csv"])
     if uploaded_file is not None:
         raw_df = pd.read_csv(uploaded_file)
+        
+        # --- DEBUGGING SNIPPET FROM SCREENSHOT ---
         st.write(f"Loaded {len(raw_df)} customers.")
+        st.write("Columns in uploaded CSV:")
+        st.write(raw_df.columns.tolist())
+        # ------------------------------------------
+        
         st.dataframe(raw_df.head(), use_container_width=True)
 
         if st.button("Run Batch Prediction", use_container_width=True):

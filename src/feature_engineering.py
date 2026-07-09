@@ -11,6 +11,7 @@ from utils import get_logger
 
 logger = get_logger(__name__)
 
+# Matches the normalized, space-removed upstream column names
 SERVICE_COLS = [
     "PhoneService", "MultipleLines", "InternetService", "OnlineSecurity",
     "OnlineBackup", "DeviceProtection", "TechSupport", "StreamingTV",
@@ -19,19 +20,13 @@ SERVICE_COLS = [
 
 
 def add_tenure_group(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Safely maps customer tenure into categorical groups.
-    Handles potential 'Tenure' vs 'tenure' casing differences.
-    """
+    """Safely maps customer tenure into categorical groups."""
     if "tenure" not in df.columns:
-        if "Tenure" in df.columns:
-            df["tenure"] = df["Tenure"]
-        else:
-            raise ValueError(
-                "Input data is missing the required 'tenure' column."
-            )
+        raise ValueError(
+            "Input data is missing the required 'tenure' column. "
+            "Ensure src/preprocessing.py normalization ran successfully."
+        )
 
-    # Maintained your script's specific binning intervals and business logic
     bins = [-1, 6, 12, 24, 48, np.inf]
     labels = ["0-6 Months", "6-12 Months", "1-2 Years", "2-4 Years", "4+ Years"]
     
@@ -45,9 +40,12 @@ def add_tenure_group(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def add_spend_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculates historical spend trends, efficiencies, and commitment-based future value."""
     # Average historical monthly spend implied by total charges vs tenure
     df["AvgMonthlySpend"] = np.where(
-        df["tenure"] > 0, df["TotalCharges"] / df["tenure"].replace(0, np.nan), df["MonthlyCharges"]
+        df["tenure"] > 0, 
+        df["TotalCharges"] / df["tenure"].replace(0, np.nan), 
+        df["MonthlyCharges"]
     )
     df["AvgMonthlySpend"] = df["AvgMonthlySpend"].fillna(df["MonthlyCharges"])
 
