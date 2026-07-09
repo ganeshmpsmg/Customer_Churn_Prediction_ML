@@ -55,8 +55,16 @@ def clean_data(df: pd.DataFrame, drop_duplicates: bool = True) -> pd.DataFrame:
         logger.info(f"Removed {before - len(df)} duplicate rows.")
 
     # TotalCharges sometimes arrives as a blank string / needs numeric coercion
-    if not pd.api.types.is_numeric_dtype(df["TotalCharges"]):
-        df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
+    if "TotalCharges" not in df.columns:
+
+        if "MonthlyCharges" in df.columns and "tenure" in df.columns:
+            df["TotalCharges"] = df["MonthlyCharges"] * df["tenure"]
+        else:
+            df["TotalCharges"] = 0
+
+
+if not pd.api.types.is_numeric_dtype(df["TotalCharges"]):
+    df["TotalCharges"] = pd.to_numeric(df["TotalCharges"], errors="coerce")
 
     # Impute numeric missing values with median
     for col in ["TotalCharges", "MonthlyCharges", "tenure"]:
