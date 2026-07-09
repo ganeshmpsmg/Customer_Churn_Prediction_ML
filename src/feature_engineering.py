@@ -19,9 +19,28 @@ SERVICE_COLS = [
 
 
 def add_tenure_group(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Safely maps customer tenure into categorical groups.
+    Handles potential 'Tenure' vs 'tenure' casing differences.
+    """
+    if "tenure" not in df.columns:
+        if "Tenure" in df.columns:
+            df["tenure"] = df["Tenure"]
+        else:
+            raise ValueError(
+                "Input data is missing the required 'tenure' column."
+            )
+
+    # Maintained your script's specific binning intervals and business logic
     bins = [-1, 6, 12, 24, 48, np.inf]
     labels = ["0-6 Months", "6-12 Months", "1-2 Years", "2-4 Years", "4+ Years"]
-    df["TenureGroup"] = pd.cut(df["tenure"], bins=bins, labels=labels)
+    
+    df["TenureGroup"] = pd.cut(
+        df["tenure"], 
+        bins=bins, 
+        labels=labels, 
+        include_lowest=True
+    )
     return df
 
 

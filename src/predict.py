@@ -56,6 +56,10 @@ class ChurnPredictor:
         # drop_duplicates=False: inference must preserve row alignment with the caller's IDs
         df = clean_data(df.assign(**{TARGET_COL: 0}), drop_duplicates=False)
         df = df.drop(columns=[TARGET_COL])
+        
+        # --- DEBUG LINE INSTALLED HERE ---
+        print(df.columns.tolist())
+        
         df = engineer_features(df)
         if "TenureGroup" in df.columns:
             df["TenureGroup"] = df["TenureGroup"].astype(str)
